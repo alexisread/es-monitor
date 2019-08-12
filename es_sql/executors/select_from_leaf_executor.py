@@ -94,7 +94,7 @@ def search_es(url, request, arguments=None, http_opener=None):
     if http_opener:
         resp = http_opener.open(http_request)
     else:
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         resp = urllib.request.urlopen(http_request)
     response = json.loads(resp.read())
     if LOGGER.isEnabledFor(logging.DEBUG):
