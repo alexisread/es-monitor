@@ -40,7 +40,7 @@ def translate_client_side_join(join_table, sql_select):
     join_filters = []
     for row in rows:
         this_filter_as_str = template_filter_str
-        for k, v in row.iteritems():
+        for k, v in list(row.items()):
             variable_name = '${%s.%s}' % (join_table, k)
             this_filter_as_str = this_filter_as_str.replace(variable_name,
                                                             "'%s'" % v if isinstance(v, basestring) else v)

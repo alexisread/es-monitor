@@ -1,4 +1,4 @@
-from es_sql.sqlparse.ordereddict import OrderedDict
+from collections import OrderedDict
 from .translators import bucket_script_translator
 from .translators import filter_translator
 from .translators import group_by_translator
@@ -19,7 +19,7 @@ class SelectInsideExecutor(object):
 
     def build_request(self):
         buckets_names = self.list_buckets_names()
-        for buckets_name, buckets_path in buckets_names.iteritems():
+        for buckets_name, buckets_path in list(buckets_names.items()):
             buckets_names[buckets_name] = self.format_buckets_path(buckets_path)
         self.sql_select.buckets_names = buckets_names
         self.metric_request, self.metric_selector = metric_translator.translate_metrics(self.sql_select)
@@ -29,7 +29,7 @@ class SelectInsideExecutor(object):
 
     def list_buckets_names(self):
         buckets_names = {}
-        for projection_name, projection in self.sql_select.projections.iteritems():
+        for projection_name, projection in list(self.sql_select.projections.items()):
             if bucket_script_translator.is_count_star(projection):
                 buckets_names[projection_name] = ['_count']
             else:
@@ -39,7 +39,7 @@ class SelectInsideExecutor(object):
         for child_executor in self.children:
             child_prefix = child_executor.sql_select.group_by.keys()
             child_buckets_names = child_executor.list_buckets_names()
-            for buckets_name, buckets_path in child_buckets_names.iteritems():
+            for buckets_name, buckets_path in list(child_buckets_names.items()):
                 buckets_names[buckets_name] = child_prefix + buckets_path
         return buckets_names
 
@@ -126,7 +126,7 @@ class SelectInsideExecutor(object):
             if 'buckets' in current_response:
                 child_buckets = current_response['buckets']
                 if isinstance(child_buckets, dict):
-                    for child_bucket_key, child_bucket in child_buckets.iteritems():
+                    for child_bucket_key, child_bucket in list(child_buckets.items()):
                         child_props = dict(props, **{group_by_names[0]: child_bucket_key})
                         self.collect_records(rows, child_bucket, group_by_names[1:], child_props)
                 else:
@@ -139,10 +139,10 @@ class SelectInsideExecutor(object):
                 self.collect_records(rows, current_response, group_by_names[1:], props)
         else:
             record = props
-            for key, value in parent_bucket.iteritems():
+            for key, value in list(parent_bucket.items()):
                 if isinstance(value, dict) and 'value' in value:
                     record[key] = value['value']
-            for metric_name, get_metric in self.metric_selector.iteritems():
+            for metric_name, get_metric in list(self.metric_selector.items()):
                 record[metric_name] = get_metric(parent_bucket)
             record['_bucket_'] = parent_bucket
             rows.append(record)

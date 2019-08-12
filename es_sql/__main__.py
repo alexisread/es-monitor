@@ -1,7 +1,7 @@
 import json
 import sys
 import logging
-import urllib2
+import urllib.error
 import sys
 
 from . import es_query
@@ -12,7 +12,7 @@ def main():
     sql = sys.stdin.read()
     result_map = es_query.execute_sql(sys.argv[1], sql)
     print('=====')
-    for result_name, rows in result_map.iteritems():
+    for result_name, rows in list(result_map.items()):
         for row in rows:
             print json.dumps(row)
 
@@ -20,7 +20,7 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except urllib2.HTTPError as e:
+    except urllib.error.HTTPError as e:
         print(e.read())
         sys.exit(1)
 

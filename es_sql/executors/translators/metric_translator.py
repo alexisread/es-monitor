@@ -8,7 +8,7 @@ from . import bucket_script_translator
 def translate_metrics(sql_select):
     metric_request = {}
     metric_selector = {}
-    for projection_name, projection in sql_select.projections.iteritems():
+    for projection_name, projection in list(sql_select.projections.items()):
         if projection_name in sql_select.group_by:
             continue
         if ttypes.Wildcard == projection.ttype:

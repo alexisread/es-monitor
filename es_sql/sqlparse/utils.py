@@ -5,8 +5,7 @@ Created on 17/05/2012
 '''
 
 import re
-from ordereddict import OrderedDict
-
+from collections import OrderedDict
 
 class Cache(OrderedDict):
     """Cache with LRU algorithm using an OrderedDict as basis

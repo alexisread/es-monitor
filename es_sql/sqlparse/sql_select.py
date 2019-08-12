@@ -4,7 +4,7 @@ from es_sql import sqlparse  # TODO: should not reference parent
 from . import datetime_evaluator
 from . import sql as stypes
 from . import tokens as ttypes
-from .ordereddict import OrderedDict
+from collections import OrderedDict
 
 
 # make the result of sqlparse more usable
@@ -28,7 +28,7 @@ class SqlSelect(object):
 
         self.is_select_inside = False
         self.on_SELECT(tokens)
-        if isinstance(self.from_table, basestring):
+        if isinstance(self.from_table, str):
             if self.group_by or self.has_function_projection():
                 self.is_select_inside = True
 

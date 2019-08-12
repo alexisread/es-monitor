@@ -7,7 +7,7 @@ from . import filter_translator
 def translate_group_by(group_by_map):
     aggs = {}
     tail_aggs = aggs
-    for group_by_name, group_by in group_by_map.iteritems():
+    for group_by_name, group_by in list(group_by_map.items()):
         if isinstance(group_by, stypes.Parenthesis):
             if len(group_by.tokens > 3):
                 raise Exception('unexpected: %s' % group_by)

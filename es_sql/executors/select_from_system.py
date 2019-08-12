@@ -1,22 +1,22 @@
-import urllib2
+import urllib.request
 import json
 
 def execute(es_url, sql_select):
     response = None
     if sql_select.from_table.startswith('_cluster_health'):
-        response = json.loads(urllib2.urlopen('%s/_cluster/health' % es_url).read())
+        response = json.loads(urllib.request.urlopen('%s/_cluster/health' % es_url).read())
         response = {'hits': {'hits': [{'_source': response}]}}
     elif sql_select.from_table.startswith('_cluster_state'):
         _, _, metric = sql_select.from_table.partition('.')
         if metric == 'nodes':
-            response = json.loads(urllib2.urlopen('%s/_cluster/state/nodes' % es_url).read())
+            response = json.loads(urllib.request.urlopen('%s/_cluster/state/nodes' % es_url).read())
             nodes = []
             for node_id, node in response['nodes'].iteritems():
                 node['node_id'] = node_id
                 nodes.append({'_source': node})
             response = {'hits': {'hits': nodes}}
         elif metric == 'blocks':
-            response = json.loads(urllib2.urlopen('%s/_cluster/state/blocks' % es_url).read())
+            response = json.loads(urllib.request.urlopen('%s/_cluster/state/blocks' % es_url).read())
             blocks = []
             for index_name, index_blocks in response['blocks'].get('indices', {}).iteritems():
                 for block_no, block in index_blocks.iteritems():
@@ -25,7 +25,7 @@ def execute(es_url, sql_select):
                     blocks.append({'_source': block})
             response = {'hits': {'hits': blocks}}
         elif metric == 'routing_table':
-            response = json.loads(urllib2.urlopen('%s/_cluster/state/routing_table' % es_url).read())
+            response = json.loads(urllib.request.urlopen('%s/_cluster/state/routing_table' % es_url).read())
             routing_tables = []
             for index_name, index_shards in response['routing_table'].get('indices', {}).iteritems():
                 for shard_index, shard_tables in index_shards.get('shards', {}).iteritems():
@@ -35,7 +35,7 @@ def execute(es_url, sql_select):
                         routing_tables.append({'_source': shard_table})
             response = {'hits': {'hits': routing_tables}}
         elif metric == 'routing_nodes':
-            response = json.loads(urllib2.urlopen('%s/_cluster/state/routing_nodes' % es_url).read())
+            response = json.loads(urllib.request.urlopen('%s/_cluster/state/routing_nodes' % es_url).read())
             routing_nodes = []
             for node_no, node_routing_nodes in response['routing_nodes'].get('nodes', {}).iteritems():
                 for routing_node in node_routing_nodes:
@@ -48,18 +48,18 @@ def execute(es_url, sql_select):
                 routing_nodes.append({'_source': routing_node})
             response = {'hits': {'hits': routing_nodes}}
         else:
-            response = json.loads(urllib2.urlopen('%s/_cluster/state' % es_url).read())
+            response = json.loads(urllib.request.urlopen('%s/_cluster/state' % es_url).read())
             response = {'hits': {'hits': [{'_source': response}]}}
     elif sql_select.from_table.startswith('_cluster_stats'):
-        response = json.loads(urllib2.urlopen('%s/_cluster/stats' % es_url).read())
+        response = json.loads(urllib.request.urlopen('%s/_cluster/stats' % es_url).read())
         rows = []
         collect_stats_rows(rows, response, ['cluster'])
         response = {'hits': {'hits': rows}}
     elif sql_select.from_table.startswith('_cluster_pending_tasks'):
-        response = json.loads(urllib2.urlopen('%s/_cluster/pending_tasks' % es_url).read())
+        response = json.loads(urllib.request.urlopen('%s/_cluster/pending_tasks' % es_url).read())
         response = {'hits': {'hits': [{'_source': task} for task in response.get('tasks', [])]}}
     elif sql_select.from_table.startswith('_cluster_reroute'):
-        response = json.loads(urllib2.urlopen('%s/_cluster/reroute' % es_url).read())
+        response = json.loads(urllib.request.urlopen('%s/_cluster/reroute' % es_url).read())
         commands = []
         for command in response.get('commands', []):
             for command_name, command_args in command.iteritems():
@@ -67,7 +67,7 @@ def execute(es_url, sql_select):
                 commands.append({'_source': command_args})
         response = {'hits': {'hits': commands}}
     elif sql_select.from_table.startswith('_nodes_stats'):
-        response = json.loads(urllib2.urlopen('%s/_nodes/stats' % es_url).read())
+        response = json.loads(urllib.request.urlopen('%s/_nodes/stats' % es_url).read())
         all_rows = []
         for node_id, node in response.get('nodes', {}).iteritems():
             node_name = node.pop('name', None)
@@ -84,7 +84,7 @@ def execute(es_url, sql_select):
             all_rows.extend(rows)
         response = {'hits': {'hits': all_rows}}
     elif sql_select.from_table.startswith('_nodes_info'):
-        response = json.loads(urllib2.urlopen('%s/_nodes' % es_url).read())
+        response = json.loads(urllib.request.urlopen('%s/_nodes' % es_url).read())
         nodes = []
         for node_id, node in response.get('nodes', {}).iteritems():
             node['node_id'] = node_id
@@ -92,7 +92,7 @@ def execute(es_url, sql_select):
         response = {'hits': {'hits': nodes}}
     elif sql_select.from_table.startswith('_indices_stats'):
         _, _, target_index_name = sql_select.from_table.partition('.')
-        response = json.loads(urllib2.urlopen('%s/_stats' % es_url).read())
+        response = json.loads(urllib.request.urlopen('%s/_stats' % es_url).read())
         all_rows = []
         if target_index_name:
             for index_name, index_stats in response.get('indices', {}).iteritems():

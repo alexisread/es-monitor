@@ -1,7 +1,7 @@
 import functools
 import logging
 import time
-import urllib2
+import urllib.request
 import json
 import base64
 
@@ -19,7 +19,7 @@ class SelectFromLeafExecutor(object):
         self.sql_select = sql_select
         self.request = self.build_request()
         self.selectors = []
-        for projection_name, projection in self.sql_select.projections.iteritems():
+        for projection_name, projection in list(self.sql_select.projections.items()):
             if projection.ttype == ttypes.Wildcard:
                 self.selectors.append(select_wildcard)
             elif projection.ttype == ttypes.Name:
@@ -75,7 +75,7 @@ def search_es(url, request, arguments=None, http_opener=None):
             raise Exception('not all parameters have been specified: %s' % (pset - aset))
         if aset - pset:
             raise Exception('too many arguments specified: %s' % (aset - pset))
-    for param_name, param in parameters.iteritems():
+    for param_name, param in list(parameters.items()):
         level = request
         for p in param['path'][:-1]:
             level = level[p]
@@ -90,11 +90,12 @@ def search_es(url, request, arguments=None, http_opener=None):
     if arguments.get('username'):
         auth_token = base64.encodestring('%s:%s' % (arguments['username'], arguments['password'])).replace('\n', '')
         headers['Authorization'] = 'Basic %s' % auth_token
-    http_request = urllib2.Request(url, headers=headers, data=json.dumps(request))
+    http_request = urllib.request.Request(url, headers=headers, data=json.dumps(request).encode("utf-8"))
     if http_opener:
         resp = http_opener.open(http_request)
     else:
-        resp = urllib2.urlopen(http_request)
+        import pdb; pdb.set_trace()
+        resp = urllib.request.urlopen(http_request)
     response = json.loads(resp.read())
     if LOGGER.isEnabledFor(logging.DEBUG):
         LOGGER.debug('[%s] === received response:\n%s' % (request_id, json.dumps(response, indent=2)))

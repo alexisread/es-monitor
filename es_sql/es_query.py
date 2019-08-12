@@ -41,7 +41,7 @@ def execute_sql(es_url, sql, arguments=None):
                     current_sql_selects = []
                 result_map.pop(is_remove.group(1))
             else:
-                exec sql_select in {'result_map': result_map}, {}
+                exec(sql_select in {'result_map': result_map}, {})
     if current_sql_selects:
         result_map['result'] = create_executor(current_sql_selects, result_map).execute(es_url, arguments)
     return result_map
@@ -65,7 +65,7 @@ def create_executor(sql_selects, joinable_results=None):
                 executor_name = match.group(1).strip()
                 sql_select = match.group(2).strip()
             sql_select = SqlSelect.parse(sql_select, joinable_results, executor_map)
-        if not isinstance(sql_select.from_table, basestring):
+        if not isinstance(sql_select.from_table, str):
             raise Exception('nested SELECT is not supported')
         if sql_select.from_table in executor_map:
             parent_executor = executor_map[sql_select.from_table]
@@ -92,7 +92,7 @@ def create_executor(sql_selects, joinable_results=None):
 def update_placeholder(request, obj, path=None):
     path = path or []
     if isinstance(obj, dict):
-        for k, v in obj.items():
+        for k, v in list(obj.items()):
             obj[k] = update_placeholder(request, v, path + [k])
         return obj
     elif isinstance(obj, (tuple, list)):

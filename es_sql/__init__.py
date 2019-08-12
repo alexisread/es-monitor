@@ -1,1 +1,1 @@
-from es_query import execute_sql
+from .es_query import execute_sql
